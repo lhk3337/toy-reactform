@@ -1,77 +1,58 @@
 import { useForm } from "react-hook-form";
 import React, { useState } from "react";
-import Form from "./components/Form";
 export default function IndexPage() {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [nameError, setNameError] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [passError, setPassError] = useState("");
-  const [login, setLogin] = useState("");
+  const [data, setData] = useState();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
 
-  const onSubmit = (e) => {
-    e.preventDefault();
-    if (username === "") {
-      setNameError("Please write down your Name");
-    }
-    if (email === "") {
-      setEmailError("Please write down your Email");
-    }
-    if (password.length < 9) {
-      setPassError("Please write down your password");
-    }
-    if (username !== "" && email.includes("@naver.com") && password.length >= 9) {
-      setLogin("Thank you");
-    }
-  };
-
-  const onChangeUserName = (e) => {
-    setUsername(e.target.value);
-    // if (username.length >= 0) {
-    //   setNameError("");
-    // }
-  };
-  const onChangeEmail = (e) => {
-    setEmail(e.target.value);
-    // if (!email.includes("@naver.com")) {
-    //   setEmailError("Only @naver emails allowed");
-    // } else if (email.includes("@naver.com") && email.length >= 0) {
-    //   setEmailError("");
-    // }
-  };
-  const onChangePassword = (e) => {
-    setPassword(e.target.value);
-    // if (password.length < 9) {
-    //   setPassError("Password has to be more than 10 char.");
-    // } else {
-    //   setPassError("");
-    // }
+  const onValid = (data) => {
+    setData(data);
   };
 
   return (
-    <>
-      <form onSubmit={onSubmit}>
-        <Form title="Name" type="text" msg={nameError} placeholder="" value={username} onChange={onChangeUserName} />
-        <Form
-          title="Email"
+    <form onSubmit={handleSubmit(onValid)}>
+      <div>
+        <span>Name: </span>
+        <input type="text" {...register("username", { required: "Please write down your name." })} placeholder="" />
+        {errors.username?.message}
+      </div>
+      <div>
+        <span>email: </span>
+        <input
           type="email"
-          msg={emailError}
+          {...register("email", {
+            required: "Please write down your email.",
+            validate: {
+              naverMail: (value) => value.includes("@naver.com") || "Only @naver email allowed.",
+            },
+          })}
           placeholder="Only @naver.com"
-          value={email}
-          onChange={onChangeEmail}
         />
-        <Form
-          title="Password"
+        {errors.email?.message}
+      </div>
+      <div>
+        <span>Password: </span>
+        <input
           type="password"
-          msg={passError}
+          {...register("password", {
+            required: "Please write down your password.",
+            minLength: {
+              message: "Password has to be more than 10 chars.",
+              value: 10,
+            },
+          })}
           placeholder="Min 10 characters"
-          value={password}
-          onChange={onChangePassword}
         />
-        <button>Log in</button>
-      </form>
-      <div>{login}</div>
-    </>
+        {errors.password?.message}
+      </div>
+
+      <input type="submit" value="Log in" />
+      <div>
+        <span>{data ? "Thank you" : null}</span>
+      </div>
+    </form>
   );
 }
